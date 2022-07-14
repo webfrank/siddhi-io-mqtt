@@ -135,7 +135,10 @@ import java.io.UnsupportedEncodingException;
                                 "to connect to the MQTT broker. Once this time interval elapses, a timeout takes " +
                                 "place.",
                         type = {DataType.INT},
-                        optional = true, defaultValue = "30")
+                        optional = true, defaultValue = "30"),
+                @Parameter(name = "autoreconnect", description = "Enable MQTT client autoreconnect if true."
+                        + " Default is false.",
+                        type = { DataType.BOOL }, optional = true, defaultValue = "false")
 
         },
         examples =
@@ -165,6 +168,7 @@ public class MqttSink extends Sink {
     private boolean cleanSession;
     private int keepAlive;
     private int connectionTimeout;
+    private boolean autoReconnect;
     private MqttClient client;
     private Option messageRetainOption;
     private StreamDefinition streamDefinition;
@@ -192,6 +196,8 @@ public class MqttSink extends Sink {
                 MqttConstants.DEFAULT_MESSAGE_RETAIN);
         this.cleanSession = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue
                     (MqttConstants.CLEAN_SESSION, MqttConstants.DEFAULT_CLEAN_SESSION));
+        this.autoReconnect = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(MqttConstants.AUTORECONNECT,
+                MqttConstants.DEFAULT_AUTORECONNECT));
         return null;
     }
 
@@ -225,6 +231,7 @@ public class MqttSink extends Sink {
             connectionOptions.setCleanSession(cleanSession);
             connectionOptions.setKeepAliveInterval(keepAlive);
             connectionOptions.setConnectionTimeout(connectionTimeout);
+            connectionOptions.setAutomaticReconnect(autoReconnect);
             client.connect(connectionOptions);
 
         } catch (MqttException e) {

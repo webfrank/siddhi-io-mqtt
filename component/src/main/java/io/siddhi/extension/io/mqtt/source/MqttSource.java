@@ -126,7 +126,10 @@ import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
                                 "place.",
                         type = {DataType.INT},
                         optional = true,
-                        defaultValue = "30")
+                        defaultValue = "30"),
+                @Parameter(name = "autoreconnect", description = "Enable MQTT client autoreconnect if true."
+                        + " Default is false.",
+                        type = {DataType.BOOL }, optional = true, defaultValue = "false")
         },
         examples =
                 {
@@ -156,6 +159,7 @@ public class MqttSource extends Source {
     private MqttClient client;
     private MqttConsumer mqttConsumer;
     private String siddhiAppName;
+    private boolean autoReconnect;
 
     @Override
     public StateFactory init(SourceEventListener sourceEventListener, OptionHolder optionHolder, String[] strings,
@@ -178,6 +182,8 @@ public class MqttSource extends Source {
                         MqttConstants.DEFAULT_CONNECTION_TIMEOUT_INTERVAL));
         this.cleanSession = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue
                 (MqttConstants.CLEAN_SESSION, MqttConstants.DEFAULT_CLEAN_SESSION));
+        this.autoReconnect = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(MqttConstants.AUTORECONNECT, 
+                        MqttConstants.DEFAULT_AUTORECONNECT));
         this.mqttConsumer = new MqttConsumer(sourceEventListener);
         return null;
     }
@@ -200,6 +206,8 @@ public class MqttSource extends Source {
             connectionOptions.setCleanSession(cleanSession);
             connectionOptions.setKeepAliveInterval(keepAlive);
             connectionOptions.setConnectionTimeout(connectionTimeout);
+            connectionOptions.setAutomaticReconnect(autoReconnect);
+            
             client.connect(connectionOptions);
             int qos = Integer.parseInt(String.valueOf(qosOption));
             mqttConsumer.subscribe(topicOption, qos, client);
@@ -238,16 +246,18 @@ public class MqttSource extends Source {
 
 
     public void destroy() {
-
+        log.info("MQTT destroy");
     }
 
     public void pause() {
-        mqttConsumer.pause();
+        log.info("MQTT pause");
 
+        mqttConsumer.pause();
     }
 
     public void resume() {
+        log.info("MQTT resume");
+        
         mqttConsumer.resume();
-
     }
 }

@@ -138,7 +138,7 @@
 
     <build>
         <plugins>
-            <plugin>
+            <!-- <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
@@ -147,7 +147,7 @@
                     </suiteXmlFiles>
                     <argLine>${surefireArgLine} -ea -Xmx512m</argLine>
                 </configuration>
-            </plugin>
+            </plugin> -->
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
@@ -157,7 +157,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
-                            org.eclipse.paho.client.mqttv3.*;
+                            org.eclipse.paho.client.mqttv3.*;;
                         </Private-Package>
                         <Export-Package>
                             io.siddhi.extension.io.mqtt.*
@@ -166,7 +166,7 @@
                             io.siddhi.core.*;version="${siddhi.version.range}",
                             io.siddhi.annotation.*;version="${siddhi.version.range}",
                             io.siddhi.query.api.*;version="${siddhi.version.range}",
-                            *;resolution:=optional
+                            *;resolution:=optional,
                         </Import-Package>
                         <Include-Resource>
                             META-INF=target/classes/META-INF

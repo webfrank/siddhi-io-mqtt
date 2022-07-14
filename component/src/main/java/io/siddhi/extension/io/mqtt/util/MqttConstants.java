@@ -42,7 +42,8 @@ public class MqttConstants {
     public static final String DEFAULT_USERNAME = null;
     public static final String CONNECTION_TIMEOUT_INTERVAL = "connection.timeout";
     public static final String DEFAULT_CONNECTION_TIMEOUT_INTERVAL = "30";
-
+    public static final String AUTORECONNECT = "autoreconnect";
+    public static final String DEFAULT_AUTORECONNECT = "false";
 
 
 }

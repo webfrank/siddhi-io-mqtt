@@ -22,7 +22,7 @@ import io.siddhi.core.stream.input.source.SourceEventListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -39,6 +39,9 @@ public class MqttConsumer {
     private boolean isPaused;
     private ReentrantLock lock;
     private Condition condition;
+    private String topicOption;
+    private int qosOption;
+    private MqttClient client;
 
     public MqttConsumer(SourceEventListener sourceEventListener) {
         this.sourceEventListener = sourceEventListener;
@@ -49,6 +52,9 @@ public class MqttConsumer {
     public void subscribe(String topicOption, int qosOption,
                           MqttClient client) throws MqttException {
         MqttSourceCallBack callback = new MqttSourceCallBack();
+        this.topicOption = topicOption;
+        this.qosOption = qosOption;
+        this.client = client;
         client.setCallback(callback);
         client.subscribe(topicOption, qosOption);
     }
@@ -56,11 +62,11 @@ public class MqttConsumer {
     /**
      * MqttCallback is called when an event is received.
      */
-    public class MqttSourceCallBack implements MqttCallback {
+    public class MqttSourceCallBack implements MqttCallbackExtended {
 
         @Override
         public void connectionLost(Throwable throwable) {
-            log.debug("MQTT connection not reachable");
+            log.error("MQTT connection not reachable");
         }
 
         @Override
@@ -83,6 +89,20 @@ public class MqttConsumer {
 
         @Override
         public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
+        }
+
+        @Override
+        public void connectComplete(boolean reconnect, String serverURI) {
+            log.info("MQTT connectComplete");
+            if (reconnect) {
+                log.info("MQTT resubscribing");
+                try {
+                    client.subscribe(topicOption, qosOption);
+                } catch (MqttException e) {
+                    log.error("MQTT Cannot subscribe to topic: " + e.toString());
+                }
+            }
+            
         }
     }
 
